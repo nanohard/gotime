@@ -74,6 +74,8 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	case "addProject":
 		ov, _ = g.View("projects")
 		p = models.AddProject(iv.Buffer())
+		// log.Fatal(p)
+		// p.AddProject(iv.Buffer())
 	case "addTask":
 		ov, _ = g.View("tasks")
 	}

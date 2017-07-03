@@ -135,6 +135,7 @@ func main() {
 
 	// Projects
 	projectItems := models.AllProjects()
+	// panic(projectItems)
 	// Loop through projects to add their names to the view.
 	for _, p := range projectItems {
 		// Again, we can simply Fprint to a view.
