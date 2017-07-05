@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"github.com/jroimartin/gocui"
 	"github.com/nanohard/gotime/models"
@@ -24,6 +25,14 @@ const (
 )
 
 func main() {
+	// Debug log
+	f, err := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("error opening file: %v", err)
+	}
+	defer f.Close()
+	log.SetOutput(f)
+
 	g, err := gocui.NewGui(gocui.OutputNormal)
 	if err != nil {
 		log.Println("Failed to create a GUI:", err)
@@ -139,19 +148,24 @@ func main() {
 	// Loop through projects to add their names to the view.
 	for _, p := range projectItems {
 		// Again, we can simply Fprint to a view.
-		_, err = fmt.Fprint(projectView, p.Name)
+		_, err = fmt.Fprintln(projectView, p.Name)
 		if err != nil {
 			log.Println("Error writing to the projects view:", err)
-			return
 		}
 	}
 
+	// Main loop stuff *********************************************
+	// Apply keybindings to program.
 	if err = keybindings(g); err != nil {
 		log.Panicln(err)
 	}
 	// Must set initial view here, right before program start!!!
 	if _, err = g.SetCurrentView("projects"); err != nil {
 		log.Panic(err)
+	}
+	// If no projects on start then prompt the user to add a project.
+	if len(projectItems) == 0 {
+		addItem(g, projectView)
 	}
 	// Start the main loop.
 	err = g.MainLoop()
