@@ -20,8 +20,8 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 		v.MoveCursor(0, 1, false)
 		_, cy := v.Cursor()
 		// var nv *gocui.View
-		if v.Name() == "projects" {
-			nv, _ := g.View("tasks")
+		if v.Name() == P {
+			nv, _ := g.View(T)
 			// n, _ := v.Word(cx, cy)
 			n, _ := v.Line(cy)
 			// log.Println("cursorDown Line:", v.Buffer())
@@ -31,9 +31,9 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 			models.CurrentProject = models.GetProject(n)
 			// log.Println("cursorDown CurrentProject:", models.CurrentProject)
 			redrawTasks(g, nv)
-		} else if v.Name() == "tasks" {
+		} else if v.Name() == T {
 			//redrawEntries
-		} else if v.Name() == "entries" {
+		} else if v.Name() == E {
 			//	redrawOutput
 		}
 	}
@@ -45,8 +45,8 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 		v.MoveCursor(0, -1, false)
 		_, cy := v.Cursor()
 		// var nv *gocui.View
-		if v.Name() == "projects" {
-			nv, _ := g.View("tasks")
+		if v.Name() == P {
+			nv, _ := g.View(T)
 			n, _ := v.Line(cy)
 			// n, _ := v.Word(cx, cy)
 			// log.Println("cursorUp Buffer:", v.Buffer())
@@ -56,9 +56,9 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 			models.CurrentProject = models.GetProject(n)
 			// log.Println("cursorUp CurrentProject:", models.CurrentProject)
 			redrawTasks(g, nv)
-		} else if v.Name() == "tasks" {
+		} else if v.Name() == T {
 			//redrawEntries
-		} else if v.Name() == "entries" {
+		} else if v.Name() == E {
 			//	redrawOutput
 		}
 	}
@@ -104,7 +104,7 @@ func lineBelow(g *gocui.Gui, v *gocui.View) bool {
 // Copy the input view (iv) and handle it.
 // Used to add project or task.
 func copyInput(g *gocui.Gui, iv *gocui.View) error {
-	var e error
+	var err error
 	// We want to read the view’s buffer from the beginning.
 	iv.Rewind()
 	// Get the output view via its name.
@@ -113,21 +113,21 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	// else go back to the input view.
 	switch iv.Name() {
 	case "addProject":
-		ov, _ = g.View("projects")
+		ov, _ = g.View(P)
 		if iv.Buffer() != "" {
 			models.AddProject(iv.Buffer())
 			redrawProjects(g, ov)
 		} else {
-			addItem(g, ov)
+			inputView(g, ov)
 			return nil
 		}
 	case "addTask":
-		ov, _ = g.View("tasks")
+		ov, _ = g.View(T)
 		if iv.Buffer() != "" {
 			models.AddTask(iv.Buffer(), models.CurrentProject)
 			redrawTasks(g, ov)
 		} else {
-			addItem(g, ov)
+			inputView(g, ov)
 			return nil
 		}
 	}
@@ -139,15 +139,14 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	// Must delete keybindings before the view, or fatal error !!!
 	// !!!
 	g.DeleteKeybindings(iv.Name())
-	if err := g.DeleteView(iv.Name()); err != nil {
-		log.Print(err)
+	if err = g.DeleteView(iv.Name()); err != nil {
+		return err
 	}
-	// redrawView(g, ov)
 	// Set the view back.
-	if _, err := g.SetCurrentView(ov.Name()); err != nil {
-		log.Print(err)
+	if _, err = g.SetCurrentView(ov.Name()); err != nil {
+		return err
 	}
-	return e
+	return err
 }
 
 // func delInput(g *gocui.Gui, v *gocui.View) error {
@@ -171,16 +170,15 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 // }
 
 // Add item to the current view (cv) using the text from the input view (iv).
-func addItem(g *gocui.Gui, cv *gocui.View) error {
+func inputView(g *gocui.Gui, cv *gocui.View) error {
 	maxX, maxY := g.Size()
 	var title string
 	var name string
 	switch cv.Name() {
-	case "projects":
+	case P:
 		title = "Name of new project"
 		name = "addProject"
-		// models.AddProject()
-	case "tasks":
+	case T:
 		title = "Name of new task"
 		name = "addTask"
 		// case "entries":
@@ -206,47 +204,43 @@ func addItem(g *gocui.Gui, cv *gocui.View) error {
 // // Get the current view (cv) and transfer cursor to the new view (nv).
 // // If the new view has no items then prompt user to add one.
 func selectItem(g *gocui.Gui, cv *gocui.View) error {
-	// var e error
-	// var nv string
-	// _, cy := cv.Cursor()
+	var err error
+	var nv *gocui.View
+
 	switch cv.Name() {
-	case "projects":
-		if _, err := g.SetCurrentView("tasks"); err != nil {
+	case P:
+		if nv, err = g.SetCurrentView(T); err != nil {
 			return err
 		}
-		// models.CurrentProject, _ = cv.Line(cy)
-	case "tasks":
+	case T:
 		// nv = "entries"
 		// case "entries":
 		//     nv = "ad-hoc"
 	}
-	// v, err := g.SetCurrentView(nv)
-	// if err != nil {
-	// 	return err
-	// }
-	// redrawView(g, v)
+	// Turn on highlight and set cursor to 0,0 of the new view.
+	nv.Highlight = true
+	if err = nv.SetCursor(0, 0); err != nil {
+		return err
+	}
 	return nil
 }
 
 // Get the current view (cv) and transfer cursor to the new view (nv).
 func goBack(g *gocui.Gui, cv *gocui.View) error {
-	// var e error
-	// var nv string
+	var err error
+	var nv *gocui.View
 	switch cv.Name() {
-	case "tasks":
-		if _, err := g.SetCurrentView("projects"); err != nil {
+	case T:
+		if nv, err = g.SetCurrentView(P); err != nil {
 			return err
 		}
-	case "entries":
+	case E:
 		// nv = "tasks"
 		// case "entries":
 		//     nv = "ad-hoc"
 	}
-	// v, err := g.SetCurrentView(nv)
-	// if err != nil {
-	// 	return err
-	// }
-	// redrawView(g, v)
+	cv.Highlight = false
+	nv.Highlight = true
 	return nil
 }
 
@@ -254,31 +248,41 @@ func goBack(g *gocui.Gui, cv *gocui.View) error {
 func redrawProjects(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-	v.Highlight = true
+	//v.Highlight = true
 	v.SelBgColor = gocui.ColorGreen
 	v.SelFgColor = gocui.ColorBlack
-	_, cy := v.Cursor()
-	l, _ := v.Line(cy)
+	// _, cy := v.Cursor()
+	// l, _ := v.Line(cy)
 	items := models.AllProjects()
 	// Loop through projects to add their names to the view.
 	for _, i := range items {
-		// Again, we can simply Fprint to a view.
+		// We can simply Fprint to a view.
 		_, err := fmt.Fprintln(v, i.Name)
 		if err != nil {
 			log.Println("Error writing to the projects view:", err)
 		}
 	}
+	// If there are no projects then one must be created.
 	if len(items) == 0 {
-		addItem(g, v)
+		inputView(g, v)
 	}
+	// While the text may shift lines on insert the cursor does not,
+	// so we need to refresh the tasks view with the currently highlighted project.
+	_, cy := v.Cursor()
+	l, _ := v.Line(cy)
 	models.CurrentProject = models.GetProject(l)
+	tasksView, _ := g.View(T)
+	models.CurrentTask = models.Task{}
+
+	redrawTasks(g, tasksView)
+	tasksView.Highlight = false
 }
 
 // Get the view and redraw it with current database info.
 func redrawTasks(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-	v.Highlight = true
+	//v.Highlight = true
 	v.SelBgColor = gocui.ColorGreen
 	v.SelFgColor = gocui.ColorBlack
 	_, cy := v.Cursor()
@@ -286,7 +290,7 @@ func redrawTasks(g *gocui.Gui, v *gocui.View) {
 	items := models.AllTasks(models.CurrentProject)
 	// Loop through tasks to add their names to the view.
 	for _, i := range items {
-		// Again, we can simply Fprint to a view.
+		// We can simply Fprint to a view.
 		_, err := fmt.Fprintln(v, i.Name)
 		if err != nil {
 			log.Println("Error writing to the projects view:", err)
@@ -304,7 +308,7 @@ func redrawTasks(g *gocui.Gui, v *gocui.View) {
 // 	// panic(projectItems)
 // 	// Loop through projects to add their names to the view.
 // 	for _, p := range projectItems {
-// 		// Again, we can simply Fprint to a view.
+// 		// We can simply Fprint to a view.
 // 		_, err := fmt.Fprintln(v, p.Name)
 // 		if err != nil {
 // 			log.Println("Error writing to the projects view:", err)
@@ -318,17 +322,17 @@ func layout(g *gocui.Gui) error {
 	tw, th := g.Size()
 	// Update the views according to the new terminal size.
 	// Projects.
-	_, err := g.SetView("projects", 0, 0, pwidth, th-4)
+	_, err := g.SetView(P, 0, 0, pwidth, th-4)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update projects view")
 	}
 	// Tasks
-	_, err = g.SetView("tasks", pwidth+1, 0, twidth, th-4)
+	_, err = g.SetView(T, pwidth+1, 0, twidth, th-4)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update tasks view")
 	}
 	// Entries
-	_, err = g.SetView("entries", twidth+1, 0, ewidth, th-4)
+	_, err = g.SetView(E, twidth+1, 0, ewidth, th-4)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update entries view")
 	}

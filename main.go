@@ -22,6 +22,12 @@ const (
 	ewidth = 61
 	// Input box height.
 	sheight = 3
+	// P is string for projects.
+	P = "projects"
+	// T is string for tasks.
+	T = "tasks"
+	// E is string for entries.
+	E = "entries"
 )
 
 func main() {
@@ -63,7 +69,7 @@ func main() {
 	// The terminal’s width and height are needed for layout calculations.
 	terminalWidth, terminalHeight := g.Size()
 	// Projects view.
-	projectView, err := g.SetView("projects", 0, 0, pwidth, terminalHeight-4)
+	projectView, err := g.SetView(P, 0, 0, pwidth, terminalHeight-4)
 	// ErrUnknownView is not a real error condition.
 	// It just says that the view did not exist before and needs initialization.
 	if err != nil && err != gocui.ErrUnknownView {
@@ -78,7 +84,7 @@ func main() {
 	// projectView.Editable = true
 
 	// Tasks view.
-	tasksView, err := g.SetView("tasks", pwidth+1, 0, twidth, terminalHeight-4)
+	tasksView, err := g.SetView(T, pwidth+1, 0, twidth, terminalHeight-4)
 	// ErrUnknownView is not a real error condition.
 	// It just says that the view did not exist before and needs initialization.
 	if err != nil && err != gocui.ErrUnknownView {
@@ -89,7 +95,7 @@ func main() {
 	tasksView.FgColor = gocui.ColorCyan
 
 	// // Entries view.
-	entriesView, err := g.SetView("entries", twidth+1, 0, ewidth, terminalHeight-4)
+	entriesView, err := g.SetView(E, twidth+1, 0, ewidth, terminalHeight-4)
 	// ErrUnknownView is not a real error condition.
 	// It just says that the view did not exist before and needs initialization.
 	if err != nil && err != gocui.ErrUnknownView {
@@ -144,15 +150,27 @@ func main() {
 
 	// Projects
 	projectItems := models.AllProjects()
+	if len(projectItems) > 0 {
+		models.CurrentProject = projectItems[0]
+		redrawProjects(g, projectView)
+		redrawTasks(g, tasksView)
+	}
+
 	// panic(projectItems)
 	// Loop through projects to add their names to the view.
-	for _, p := range projectItems {
-		// Again, we can simply Fprint to a view.
-		_, err = fmt.Fprintln(projectView, p.Name)
-		if err != nil {
-			log.Println("Error writing to the projects view:", err)
-		}
-	}
+	// for _, p := range projectItems {
+	// 	// Again, we can simply Fprint to a view.
+	// 	_, err = fmt.Fprintln(projectView, p.Name)
+	// 	if err != nil {
+	// 		log.Println("Error writing to the projects view:", err)
+	// 	}
+	// }
+	// If there is at least one project item then it will be highlighted on program start.
+	// So then we also want to load its tasks to be shown on start as well.
+	// if len(projectItems) > 0 {
+	// 	//models.CurrentProject = projectItems[0]
+	// 	redrawTasks(g, tasksView)
+	// }
 
 	// Main loop stuff *********************************************
 	// Apply keybindings to program.
@@ -160,12 +178,12 @@ func main() {
 		log.Panicln(err)
 	}
 	// Must set initial view here, right before program start!!!
-	if _, err = g.SetCurrentView("projects"); err != nil {
+	if _, err = g.SetCurrentView(P); err != nil {
 		log.Panic(err)
 	}
 	// If no projects on start then prompt the user to add a project.
 	if len(projectItems) == 0 {
-		addItem(g, projectView)
+		inputView(g, projectView)
 	}
 	// Start the main loop.
 	err = g.MainLoop()
