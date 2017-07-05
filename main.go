@@ -48,7 +48,8 @@ func main() {
 
 	// Highlight active view.
 	g.Highlight = true
-	g.SelFgColor = gocui.ColorGreen
+	g.SelFgColor = gocui.ColorBlue
+	g.BgColor = gocui.ColorBlack
 
 	// The GUI object wants to know how to manage the layout.
 	// Unlike termui, gocui does not use a grid layout.
@@ -79,7 +80,7 @@ func main() {
 	projectView.Title = "Projects"
 	projectView.FgColor = gocui.ColorCyan
 	projectView.Highlight = true
-	projectView.SelBgColor = gocui.ColorGreen
+	projectView.SelBgColor = gocui.ColorBlue
 	projectView.SelFgColor = gocui.ColorBlack
 	// projectView.Editable = true
 
@@ -93,6 +94,8 @@ func main() {
 	}
 	tasksView.Title = "Tasks"
 	tasksView.FgColor = gocui.ColorCyan
+	tasksView.SelBgColor = gocui.ColorBlue
+	tasksView.SelFgColor = gocui.ColorBlack
 
 	// // Entries view.
 	entriesView, err := g.SetView(E, twidth+1, 0, ewidth, terminalHeight-4)
@@ -104,6 +107,8 @@ func main() {
 	}
 	entriesView.Title = "Entries"
 	entriesView.FgColor = gocui.ColorCyan
+	entriesView.SelBgColor = gocui.ColorBlue
+	entriesView.SelFgColor = gocui.ColorBlack
 
 	// Output view.
 	outputView, err := g.SetView("output", ewidth+1, 0, terminalWidth-1, terminalHeight-4)

@@ -9,10 +9,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-// var CurrentProject models.Project
-// var CurrentTask models.Task
-// var CurrentEntry models.Entry
-
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	// Check to make sure data exists in the next line,
 	// otherwise disallow scroll down.
@@ -249,8 +245,8 @@ func redrawProjects(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
 	//v.Highlight = true
-	v.SelBgColor = gocui.ColorGreen
-	v.SelFgColor = gocui.ColorBlack
+	// v.SelBgColor = gocui.ColorGreen
+	// v.SelFgColor = gocui.ColorBlack
 	// _, cy := v.Cursor()
 	// l, _ := v.Line(cy)
 	items := models.AllProjects()
@@ -283,8 +279,8 @@ func redrawTasks(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
 	//v.Highlight = true
-	v.SelBgColor = gocui.ColorGreen
-	v.SelFgColor = gocui.ColorBlack
+	// v.SelBgColor = gocui.ColorGreen
+	// v.SelFgColor = gocui.ColorBlack
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
 	items := models.AllTasks(models.CurrentProject)
