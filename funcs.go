@@ -370,6 +370,12 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 		// }
 		// }
 	}
+	v.SetCursor(0, 0)
+	_, cy := v.Cursor()
+	l, _ := v.Line(cy)
+	// log.Println("redrawEntries line:", l)
+	models.CurrentEntry = models.GetEntry(l)
+	// log.Println("redrawEntries CurrentEntry:", models.CurrentEntry.Name)
 	// outputView, _ := g.View(O)
 	outputView, _ := g.View(O)
 	redrawOutput(g, outputView)
@@ -380,12 +386,13 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 	now := time.Now()
 	// nowS := now.Format(models.TL)
 	e := models.StartEntry(models.CurrentTask, now)
-	redrawEntries(g, v)
+	//redrawEntries(g, v)
 	models.CurrentEntry = e
 	ov, err := g.SetCurrentView("output")
 	if err != nil {
 		return err
 	}
+	ov.Clear()
 	ov.Editable = true
 	g.Cursor = true
 	ov.SetCursor(0, 0)
@@ -399,7 +406,9 @@ func doneEntry(g *gocui.Gui, v *gocui.View) error {
 	o, _ := g.View("output")
 	d := o.Buffer()
 	models.StopEntry(models.CurrentEntry, now, d)
-	redrawEntries(g, v)
+	entriesView, _ := g.View(E)
+	redrawEntries(g, entriesView)
+	//cursorUp(g *gocui.Gui, v *gocui.View)
 	ov, err := g.View("output")
 	if err != nil {
 		return err
@@ -407,6 +416,7 @@ func doneEntry(g *gocui.Gui, v *gocui.View) error {
 	ov.Editable = false
 	g.Cursor = false
 	g.SetCurrentView(E)
+
 	return err
 }
 
@@ -426,16 +436,21 @@ func redrawOutput(g *gocui.Gui, v *gocui.View) {
 	// ov, _ := g.View(O)
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-	if models.CurrentEntry.Start.IsZero() == false {
+	// b := models.CurrentEntry.Start.IsZero()
+	// log.Println("CurrentEntry Start:", models.CurrentEntry.Start.IsZero())
+	// log.Println("redrawOutput CurrentEntry:", models.CurrentEntry.Name)
+	cv := g.CurrentView()
+	if models.CurrentEntry.Start.IsZero() == false &&
+		cv.Name() != P && cv.Name() != T {
 		// if models.CurrentEntry.Name != "" {
 		// _, cy := v.Cursor()
 		// l, _ := v.Line(cy)
 		details := models.CurrentEntry.Details
 		start := models.CurrentEntry.Start.Format(models.TL)
 		end := models.CurrentEntry.End.Format(models.TL)
-		hours := models.CurrentEntry.TotalTime.Hours()
-		minutes := models.CurrentEntry.TotalTime.Minutes()
-		if _, err := fmt.Fprintf(v, "Start: [%v]\nEnd [%v]\n[%v] Hours\n[%v] Minutes\n",
+		hours := int(models.CurrentEntry.TotalTime.Hours())
+		minutes := int(models.CurrentEntry.TotalTime.Minutes())
+		if _, err := fmt.Fprintf(v, "Start: %v\nEnd:   %v\n%d Hours\n%d Minutes\n\n",
 			start, end, hours, minutes); err != nil {
 			log.Println("Error writing to the entries view:", err)
 		}

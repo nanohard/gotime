@@ -40,8 +40,8 @@ func AllEntries(t Task) []Entry {
 // after scanning it into the struct.
 func GetEntry(n string) Entry {
 	var e Entry
-	en := TimeOut(n)
-	DB.Where("name = ?", en).First(&e)
+	// en := TimeOut(n)
+	DB.Where("name = ?", n).First(&e)
 	return e
 }
 
