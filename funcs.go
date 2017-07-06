@@ -146,8 +146,6 @@ func inputView(g *gocui.Gui, cv *gocui.View) error {
 	case T:
 		title = "Name of new task"
 		name = "addTask"
-		// case E:
-		// title = "Name of new entry"
 	}
 	if iv, err := g.SetView(name, maxX/2-12, maxY/2, maxX/2+12, maxY/2+2); err != nil {
 		if err != gocui.ErrUnknownView {
@@ -177,39 +175,17 @@ func selectItem(g *gocui.Gui, cv *gocui.View) error {
 		var nv *gocui.View
 		switch cv.Name() {
 		case P:
-			// models.CurrentProject = models.GetProject(n)
 			if nv, err = g.SetCurrentView(T); err != nil {
 				return err
 			}
 			nv.SetCursor(0, 0)
 			cursorUp(g, nv)
-			// projectsView, _ := g.View(P)
-			// redrawProjects(g, projectsView)
-			// _, cy = nv.Cursor()
-			// n, _ = nv.Line(cy)
-			// panic(n)
-			// models.CurrentTask = models.GetTask(n)
-			// redrawTasks(g, nv)
-
-			// entriesView, _ := g.View(E)
-			// redrawEntries(g, entriesView)
-			// redrawEntries(g, nv)
-
 		case T:
 			if nv, err = g.SetCurrentView(E); err != nil {
 				return err
 			}
 			nv.SetCursor(0, 0)
 			cursorUp(g, nv)
-			// models.CurrentTask = models.GetTask(n)
-			// _, cy = nv.Cursor()
-			// n, _ = nv.Line(cy)
-			// models.CurrentEntry = models.GetEntry(n)
-			// outputView, _ := g.View(O)
-			// entriesView, _ := g.View(E)
-			// redrawEntries(g, entriesView)
-			// redrawOutput(g, outputView)
-			// case E:
 		}
 		// Turn on highlight and set cursor to 0,0 of the new view.
 		nv.Highlight = true
@@ -286,7 +262,6 @@ func redrawProjects(g *gocui.Gui, v *gocui.View) {
 func redrawTasks(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-
 	items := models.AllTasks(models.CurrentProject)
 	// Loop through tasks to add their names to the view.
 	for _, i := range items {
@@ -297,26 +272,11 @@ func redrawTasks(g *gocui.Gui, v *gocui.View) {
 		}
 	}
 	if len(items) != 0 {
-		// if cv := g.CurrentView(); cv != nil {
-		// cn := cv.Name()
-		// if cn == T {
-		// entriesView, _ := g.View(E)
 		_, cy := v.Cursor()
 		l, _ := v.Line(cy)
-		// panic(l)
 		models.CurrentTask = models.GetTask(l)
-		// While the text may shift lines on insert the cursor does not,
-		// so we need to refresh the tasks view with the currently highlighted project.
-		// if g.CurrentView().Name() == T {
-		// _, cy = v.Cursor()
-		// l, _ = v.Line(cy)
-
-		// }
-		// }
-		// }
 	}
 	entriesView, _ := g.View(E)
-	// models.CurrentEntry = models.Entry{}
 	redrawEntries(g, entriesView)
 	entriesView.Highlight = false
 }
@@ -325,41 +285,8 @@ func redrawTasks(g *gocui.Gui, v *gocui.View) {
 func redrawEntries(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-	// _, cy := v.Cursor()
-	// l, _ := v.Line(cy)
 	items := models.AllEntries(models.CurrentTask)
-	// if len(items) != 0 {
-	// 	_, cy := v.Cursor()
-	// 	l, _ := v.Line(cy)
-	// 	models.CurrentEntry = models.GetEntry(l)
-	// 	// While the text may shift lines on insert the cursor does not,
-	// 	// so we need to refresh the tasks view with the currently highlighted project.
-	// 	// if g.CurrentView().Name() == T {
-	// 	// _, cy = v.Cursor()
-	// 	// l, _ = v.Line(cy)
-	// 	outputView, _ := g.View(O)
-	// 	//models.CurrentEntry = models.Entry{}
-	// 	redrawOutput(g, outputView)
-	// 	//entriesView.Highlight = false
-	// 	// }
-	//
-	// }
-
-	// if len(items) != 0 {
 	if cv := g.CurrentView(); cv != nil && cv.Name() != P {
-		// cn := cv.Name()
-		// if cn == T || cn == E {
-		// _, cy := v.Cursor()
-		// l, _ := v.Line(cy)
-		// models.CurrentTask = models.GetTask(l)
-		// While the text may shift lines on insert the cursor does not,
-		// so we need to refresh the tasks view with the currently highlighted project.
-		// if g.CurrentView().Name() == T {
-		// _, cy = v.Cursor()
-		// l, _ = v.Line(cy)
-
-		// }
-		// // Loop through tasks to add their names to the view.
 		for _, i := range items {
 			// We can simply Fprint to a view.
 			_, err := fmt.Fprintln(v, i.Name)
@@ -367,16 +294,11 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 				log.Println("Error writing to the entries view:", err)
 			}
 		}
-		// }
-		// }
 	}
 	v.SetCursor(0, 0)
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
-	// log.Println("redrawEntries line:", l)
 	models.CurrentEntry = models.GetEntry(l)
-	// log.Println("redrawEntries CurrentEntry:", models.CurrentEntry.Name)
-	// outputView, _ := g.View(O)
 	outputView, _ := g.View(O)
 	redrawOutput(g, outputView)
 }
@@ -384,9 +306,7 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 func newEntry(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	now := time.Now()
-	// nowS := now.Format(models.TL)
 	e := models.StartEntry(models.CurrentTask, now)
-	//redrawEntries(g, v)
 	models.CurrentEntry = e
 	ov, err := g.SetCurrentView("output")
 	if err != nil {
@@ -402,13 +322,11 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 func doneEntry(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	now := time.Now()
-	// nowS := now.Format(models.TL)
 	o, _ := g.View("output")
 	d := o.Buffer()
 	models.StopEntry(models.CurrentEntry, now, d)
 	entriesView, _ := g.View(E)
 	redrawEntries(g, entriesView)
-	//cursorUp(g *gocui.Gui, v *gocui.View)
 	ov, err := g.View("output")
 	if err != nil {
 		return err
