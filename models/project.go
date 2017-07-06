@@ -7,6 +7,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// CurrentProject holds the struct of the currently
+// highlighted project.
 var CurrentProject Project
 
 // Project model.

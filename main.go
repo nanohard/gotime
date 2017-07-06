@@ -19,7 +19,7 @@ const (
 	// Tasks box width.
 	twidth = 44
 	// Entries box width.
-	ewidth = 61
+	ewidth = 62
 	// Input box height.
 	sheight = 3
 	// P is string for projects.
@@ -28,6 +28,8 @@ const (
 	T = "tasks"
 	// E is string for entries.
 	E = "entries"
+	// O is string for output.
+	O = "output"
 )
 
 func main() {
@@ -50,6 +52,7 @@ func main() {
 	g.Highlight = true
 	g.SelFgColor = gocui.ColorBlue
 	g.BgColor = gocui.ColorBlack
+	g.FgColor = gocui.ColorWhite
 
 	// The GUI object wants to know how to manage the layout.
 	// Unlike termui, gocui does not use a grid layout.
@@ -116,7 +119,7 @@ func main() {
 		log.Println("Failed to create output view (AAAGGHHH!!!):", err)
 		return
 	}
-	outputView.FgColor = gocui.ColorGreen
+	outputView.FgColor = gocui.ColorWhite
 	// Let the view scroll if the output exceeds the visible area.
 	outputView.Autoscroll = true
 	_, err = fmt.Println(outputView, "Press Ctrl-c to quit")
@@ -158,7 +161,7 @@ func main() {
 	if len(projectItems) > 0 {
 		models.CurrentProject = projectItems[0]
 		redrawProjects(g, projectView)
-		redrawTasks(g, tasksView)
+		//redrawTasks(g, tasksView)
 	}
 
 	// panic(projectItems)

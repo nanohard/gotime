@@ -7,6 +7,8 @@ import (
 	"github.com/jinzhu/gorm"
 )
 
+// CurrentTask holds the struct of the currently
+// highlighted task.
 var CurrentTask Task
 
 // Task model.
