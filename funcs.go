@@ -10,6 +10,8 @@ import (
 	"github.com/pkg/errors"
 )
 
+var bottom = false
+
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	// Check to make sure data exists in the next line,
 	// otherwise disallow scroll down.
@@ -295,7 +297,12 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 			}
 		}
 	}
-	v.SetCursor(0, 0)
+	if bottom == false {
+		v.SetCursor(0, 0)
+	} else {
+		v.SetCursor(0, len(items)-1)
+	}
+
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
 	models.CurrentEntry = models.GetEntry(l)
@@ -326,6 +333,7 @@ func doneEntry(g *gocui.Gui, v *gocui.View) error {
 	d := o.Buffer()
 	models.StopEntry(models.CurrentEntry, now, d)
 	entriesView, _ := g.View(E)
+	bottom = true
 	redrawEntries(g, entriesView)
 	ov, err := g.View("output")
 	if err != nil {
@@ -334,6 +342,7 @@ func doneEntry(g *gocui.Gui, v *gocui.View) error {
 	ov.Editable = false
 	g.Cursor = false
 	g.SetCurrentView(E)
+	bottom = false
 
 	return err
 }
