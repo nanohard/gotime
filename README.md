@@ -27,8 +27,8 @@ Upon starting the program you will be required to type in the name of a project.
 Created by [**Nanohard**](https://github.com/nanohard)
 
 ### Libraries
-[gocui](https://github.com/jroimartin/gocui)
-[gorm](https://github.com/jinzhu/gorm)
+* [gocui](https://github.com/jroimartin/gocui)
+* [gorm](https://github.com/jinzhu/gorm)
 
 ### License
 Released under the [BSD-3 License](https://github.com/nanohard/gotime/blob/master/LICENSE)
