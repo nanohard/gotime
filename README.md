@@ -16,7 +16,7 @@ The time is stamped in seconds upon starting and stopping an entry; no timer is 
 Upon starting the program you will be required to type in the name of a project. Navigate to the right and press Ctrl-A to add a task, and do the same to create and start an entry. Press Ctrl-S to save the entry.
 
 ### Installation
-Download the [zip](https://github.com/nanohard/gotime/files/1133188/gotime-1.0.1.zip) of the binary or
+Download the [latest release](https://github.com/nanohard/gotime/releases/latest) of the binary or
 
 `go get github.com/nanohard/gotime`
 
