@@ -67,8 +67,6 @@ func UpdateProject(p Project) Project {
 // HoursMinutes takes all entries for a project and returns its
 // hours and minutes, both as ints.
 func (p Project) HoursMinutes() (h int, m int) {
-	// var e []Entry
-	// DB.Model(&p).Related(&e)
 	DB.Preload("Entries").Find(&p)
 	var total float64
 	for _, i := range p.Entries {

@@ -32,7 +32,8 @@ type Entry struct {
 // AllEntries queries the database for, and returns, all entries after scanning them into a slice.
 func AllEntries(t Task) []Entry {
 	var e []Entry
-	// DB.Model(&t).Related(&e)
+	// SoryBy = "name" and timestamps are used as the names for entries,
+	// so by sorting in desc order it will put the latest entry at the top.
 	o := Setting.SortBy + " " + "desc"
 	DB.Order(o).Model(&t).Related(&e)
 	return e
@@ -42,7 +43,6 @@ func AllEntries(t Task) []Entry {
 // after scanning it into the struct.
 func GetEntry(n string) Entry {
 	var e Entry
-	// en := TimeOut(n)
 	DB.Where("name = ?", n).First(&e)
 	return e
 }
@@ -85,10 +85,6 @@ func (e Entry) HoursMinutes() (h int, m int) {
 // TimeIn turns a time object into a datetime string.
 func TimeIn(t time.Time) string {
 	return t.Format(TL)
-	// t := time.SecondsToLocalTime(1305861602)
-	// t.ZoneOffset = -4*60*60
-	// fmt.Println(t.Format("2006-01-02 15:04:05 -0700"))
-	// => "2011-05-20 03:20:02 -0400"
 }
 
 // TimeOut turns a datetime string into a time object.

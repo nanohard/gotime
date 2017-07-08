@@ -29,18 +29,15 @@ func InitDB() {
 	}
 
 	DB.Exec(`PRAGMA foreign_keys=ON`) // Need this to use foreign keys on sqlite.
-	// DB.Commit()
 	// DB.LogMode(true) // Turn on for debugging.
-	// defer DB.Close()
 
 	// Creates tables, columns, indexes. Does not delete or modify existing.
 	DB.AutoMigrate(&Project{}, &Task{}, &Entry{}, &setting{})
 
 	// Create settings table.
 	DB.Exec("INSERT OR IGNORE INTO settings (id, sort_by, sort_order) VALUES(1, 'name', 'asc')")
-	// DB.Commit()
-	// Get only row from settings table and insert into exported variable.
 
+	// Get only row from settings table and insert into exported variable.
 	row := DB.Table("settings").Where("id = ?", "1").Select("sort_by, sort_order").Row() // (*sql.Row)
 	row.Scan(&Setting.SortBy, &Setting.SortOrder)
 	// DB.First does not work for some reason...

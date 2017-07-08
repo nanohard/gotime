@@ -117,26 +117,6 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	return err
 }
 
-// func delInput(g *gocui.Gui, v *gocui.View) error {
-// 	if err := g.DeleteView("msg"); err != nil {
-// 		return err
-// 	}
-// 	if _, err := g.SetCurrentView("projects"); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-//
-// func delMsg(g *gocui.Gui, v *gocui.View) error {
-// 	if err := g.DeleteView("msg"); err != nil {
-// 		return err
-// 	}
-// 	if _, err := g.SetCurrentView("projects"); err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 // Add item to the current view (cv) using the text from the input view (iv).
 func inputView(g *gocui.Gui, cv *gocui.View) error {
 	maxX, maxY := g.Size()
@@ -199,8 +179,10 @@ func selectItem(g *gocui.Gui, cv *gocui.View) error {
 	return nil
 }
 
-// Get the current view (cv) and transfer cursor to the new view (nv).
+// Get the name of the item at the cursor and delete it.
 // Disallow if there is no string at current cursor.
+// Hmm... I'm thinking that if two tasks have the same name it would randomly pick one.
+// Maybe not, but I forget how it sets the models.Current[Item]. Something to look out for.
 func deleteItem(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	_, cy := v.Cursor()
@@ -230,6 +212,7 @@ func deleteItem(g *gocui.Gui, v *gocui.View) error {
 }
 
 // Get the current view (cv) and transfer cursor to the new view (nv).
+// Basically the opposite of selectItem.
 func goBack(g *gocui.Gui, cv *gocui.View) error {
 	var err error
 	var nv *gocui.View
@@ -239,8 +222,6 @@ func goBack(g *gocui.Gui, cv *gocui.View) error {
 		if nv, err = g.SetCurrentView(P); err != nil {
 			return err
 		}
-		// models.CurrentTask = models.Task{}
-		// models.CurrentEntry = models.Entry{}
 		entriesView, _ := g.View(E)
 		redrawEntries(g, entriesView)
 	// Move from entries to tasks view.
@@ -248,8 +229,6 @@ func goBack(g *gocui.Gui, cv *gocui.View) error {
 		if nv, err = g.SetCurrentView(T); err != nil {
 			return err
 		}
-		// models.CurrentEntry = models.Entry{}
-		//redrawOutput(g, cv)
 		outputView, _ := g.View(O)
 		redrawOutput(g, outputView)
 	}
@@ -261,6 +240,10 @@ func goBack(g *gocui.Gui, cv *gocui.View) error {
 }
 
 // Get the view and redraw it with current database info.
+// It's important to note that this function will call
+// redrawTasks, which will call
+// redrawEntries, which will call
+// redrawOutput. Make it fucking rain.
 func redrawProjects(g *gocui.Gui, v *gocui.View) {
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
@@ -342,6 +325,8 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 	redrawOutput(g, outputView)
 }
 
+// Start a new entry.
+// This program does not use a timer, just timestamps.
 func newEntry(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	v.Highlight = false
@@ -360,6 +345,8 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 }
 
 // v will always equal output view
+// This saves the text in the output view and does what it needs to do
+// with it depending on what view it was called from (before switching to the output view).
 func save(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	if dView != nil && dView.Name() == P {
@@ -399,27 +386,14 @@ func save(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
-func updateEntry(g *gocui.Gui, v *gocui.View) error {
-	var err error
-	// now := time.Now()
-	// // nowS := now.Format(models.TL)
-	// models.StopEntry(models.CurrentEntry, now)
-	return err
-}
-
 // Get the view and redraw it with current database info.
-// v is current view and ov is output view.
 // The output view should not need to be redrawn while it is itself selected,
 // but we'll see...
+// v is always the output view.
 func redrawOutput(g *gocui.Gui, v *gocui.View) {
-	// ov, _ := g.View(O)
 	// Clear the view of content and redraw it with a fresh database query.
 	v.Clear()
-	// b := models.CurrentEntry.Start.IsZero()
-	// log.Println("CurrentEntry Start:", models.CurrentEntry.Start.IsZero())
-	// log.Println("redrawOutput CurrentEntry:", models.CurrentEntry.Name)
 	if cv := g.CurrentView(); cv != nil {
-		// log.Println("redrawOutput cv.Name():", cv.Name())
 		// Projects
 		if cv.Name() == P {
 			h, m := models.CurrentProject.HoursMinutes()
@@ -447,13 +421,8 @@ func redrawOutput(g *gocui.Gui, v *gocui.View) {
 			details := models.CurrentEntry.Details
 			start := models.CurrentEntry.Start.Format(models.TL)
 			end := models.CurrentEntry.End.Format(models.TL)
-			// hours, minutes := models.HoursMinutes(models.CurrentEntry)
 			hours, minutes := models.CurrentEntry.HoursMinutes()
 
-			// if _, err := fmt.Fprintf(v, "Start: %v\nEnd:   %v\n%d Hours\n%d Minutes\n\n",
-			// 	start, end, hours, minutes); err != nil {
-			// 	log.Println("Error writing entry to the output view:", err)
-			// }
 			if _, err := fmt.Fprintf(v, "%d Hours\n%d Minutes\nStart: %v\nEnd:   %v\n\n",
 				hours, minutes, start, end); err != nil {
 				log.Println("Error writing entry to the output view:", err)
@@ -465,6 +434,7 @@ func redrawOutput(g *gocui.Gui, v *gocui.View) {
 	}
 }
 
+// This adds a description for projects and tasks.
 func addDescription(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	dView = v
@@ -497,30 +467,31 @@ func layout(g *gocui.Gui) error {
 	tw, th := g.Size()
 	// Update the views according to the new terminal size.
 	// Projects.
-	_, err := g.SetView(P, 0, 0, pwidth, th-4)
+	_, err := g.SetView(P, 0, 0, pwidth, th-1)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update projects view")
 	}
 	// Tasks
-	_, err = g.SetView(T, pwidth+1, 0, twidth, th-4)
+	_, err = g.SetView(T, pwidth+1, 0, twidth, th-1)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update tasks view")
 	}
 	// Entries
-	_, err = g.SetView(E, twidth+1, 0, ewidth, th-4)
+	_, err = g.SetView(E, twidth+1, 0, ewidth, th-1)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update entries view")
 	}
 	// Output
-	_, err = g.SetView("output", ewidth+1, 0, tw-1, th-4)
+	_, err = g.SetView("output", ewidth+1, 0, tw-1, th-1)
 	if err != nil {
 		return errors.Wrap(err, "Cannot update output view")
 	}
 	// Status
-	_, err = g.SetView("status", 0, th-sheight, tw-1, th-1)
-	if err != nil {
-		return errors.Wrap(err, "Cannot update input view.")
-	}
+	// Not used right now. If uncommented set all above SetView() y1 values to 'th-4'.
+	// _, err = g.SetView("status", 0, th-sheight, tw-1, th-1)
+	// if err != nil {
+	// 	return errors.Wrap(err, "Cannot update input view.")
+	// }
 	return nil
 }
 

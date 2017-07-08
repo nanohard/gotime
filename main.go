@@ -85,7 +85,6 @@ func main() {
 	projectView.Highlight = true
 	projectView.SelBgColor = gocui.ColorBlue
 	projectView.SelFgColor = gocui.ColorBlack
-	// projectView.Editable = true
 
 	// Tasks view.
 	tasksView, err := g.SetView(T, pwidth+1, 0, twidth, terminalHeight-4)
@@ -129,28 +128,14 @@ func main() {
 	outputView.Wrap = true
 
 	// Status view.
-	statusView, err := g.SetView("status", 0, terminalHeight-sheight, terminalWidth-1, terminalHeight-1)
-	if err != nil && err != gocui.ErrUnknownView {
-		log.Println("Failed to create input view:", err)
-		return
-	}
-	statusView.Title = "Status"
-	statusView.FgColor = gocui.ColorYellow
-
-	// The input view shall be editable.
-	// inputView.Editable = true
-	// err = inputView.SetCursor(0, 0)
-	// if err != nil {
-	// 	log.Println("Failed to set cursor:", err)
+	// Not used right now.
+	// statusView, err := g.SetView("status", 0, terminalHeight-sheight, terminalWidth-1, terminalHeight-1)
+	// if err != nil && err != gocui.ErrUnknownView {
+	// 	log.Println("Failed to create input view:", err)
 	// 	return
 	// }
-	// Set the focus to the input view.
-	// _, err = g.SetCurrentView("input")
-	// Activate the cursor for the current view.
-	// g.Cursor = true
-	// if err != nil {
-	// 	log.Println("Cannot set focus to input view:", err)
-	// }
+	// statusView.Title = "Status"
+	// statusView.FgColor = gocui.ColorYellow
 
 	// Database ***************************************************
 	models.InitDB()
@@ -161,24 +146,7 @@ func main() {
 	if len(projectItems) > 0 {
 		models.CurrentProject = projectItems[0]
 		redrawProjects(g, projectView)
-		//redrawTasks(g, tasksView)
 	}
-
-	// panic(projectItems)
-	// Loop through projects to add their names to the view.
-	// for _, p := range projectItems {
-	// 	// Again, we can simply Fprint to a view.
-	// 	_, err = fmt.Fprintln(projectView, p.Name)
-	// 	if err != nil {
-	// 		log.Println("Error writing to the projects view:", err)
-	// 	}
-	// }
-	// If there is at least one project item then it will be highlighted on program start.
-	// So then we also want to load its tasks to be shown on start as well.
-	// if len(projectItems) > 0 {
-	// 	//models.CurrentProject = projectItems[0]
-	// 	redrawTasks(g, tasksView)
-	// }
 
 	// Main loop stuff *********************************************
 	// Apply keybindings to program.
