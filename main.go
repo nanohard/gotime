@@ -186,9 +186,11 @@ func main() {
 		log.Panicln(err)
 	}
 	// Must set initial view here, right before program start!!!
-	if _, err = g.SetCurrentView(P); err != nil {
-		log.Panic(err)
-	}
+	v, _ := g.SetCurrentView(P)
+	// Move the cursor to update the output view with the description.
+	// (workaround)
+	cursorUp(g, v)
+
 	// If no projects on start then prompt the user to add a project.
 	if len(projectItems) == 0 {
 		inputView(g, projectView)

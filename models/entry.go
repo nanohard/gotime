@@ -32,7 +32,9 @@ type Entry struct {
 // AllEntries queries the database for, and returns, all entries after scanning them into a slice.
 func AllEntries(t Task) []Entry {
 	var e []Entry
-	DB.Model(&t).Related(&e)
+	// DB.Model(&t).Related(&e)
+	o := Setting.SortBy + " " + "desc"
+	DB.Order(o).Model(&t).Related(&e)
 	return e
 }
 
@@ -43,6 +45,11 @@ func GetEntry(n string) Entry {
 	// en := TimeOut(n)
 	DB.Where("name = ?", n).First(&e)
 	return e
+}
+
+// Delete one entry.
+func (e Entry) Delete() {
+	DB.Delete(&e)
 }
 
 // StartEntry queries the database for one entry by name.
@@ -62,6 +69,17 @@ func StopEntry(e Entry, s time.Time, d string) Entry {
 	var tt time.Duration = s.Sub(e.Start)
 	DB.Model(&e).Updates(Entry{End: s, TotalTime: tt, Details: d})
 	return e
+}
+
+// HoursMinutes takes an Entry{} and returns its
+// hours and minutes, both as ints.
+func (e Entry) HoursMinutes() (h int, m int) {
+	total := int(e.TotalTime.Seconds())
+	hours := total / 3600
+	f := float64((total % 3600.0) / 60.0)
+	i := float64(f) + float64(0.5)
+	minutes := int(i)
+	return hours, minutes
 }
 
 // TimeIn turns a time object into a datetime string.

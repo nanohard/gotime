@@ -11,6 +11,7 @@ import (
 )
 
 var bottom = false
+var dView *gocui.View
 
 func cursorDown(g *gocui.Gui, v *gocui.View) error {
 	// Check to make sure data exists in the next line,
@@ -199,6 +200,36 @@ func selectItem(g *gocui.Gui, cv *gocui.View) error {
 }
 
 // Get the current view (cv) and transfer cursor to the new view (nv).
+// Disallow if there is no string at current cursor.
+func deleteItem(g *gocui.Gui, v *gocui.View) error {
+	var err error
+	_, cy := v.Cursor()
+	n, _ := v.Line(cy)
+	// If line at cursor is not empty (item is selected) then continue.
+	if n != "" {
+		switch v.Name() {
+		case P:
+			models.CurrentProject.Delete()
+			redrawProjects(g, v)
+			v.SetCursor(0, 0)
+			cursorUp(g, v)
+		case T:
+			models.CurrentTask.Delete()
+			redrawTasks(g, v)
+			v.SetCursor(0, 0)
+			cursorUp(g, v)
+
+		case E:
+			models.CurrentEntry.Delete()
+			redrawEntries(g, v)
+			v.SetCursor(0, 0)
+			cursorUp(g, v)
+		}
+	}
+	return err
+}
+
+// Get the current view (cv) and transfer cursor to the new view (nv).
 func goBack(g *gocui.Gui, cv *gocui.View) error {
 	var err error
 	var nv *gocui.View
@@ -297,12 +328,13 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 			}
 		}
 	}
+	// Set cursor to last item if we just finished inputting an entry.
 	if bottom == false {
 		v.SetCursor(0, 0)
 	} else {
 		v.SetCursor(0, len(items)-1)
 	}
-
+	// Read the cursor, get the data, print it.
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
 	models.CurrentEntry = models.GetEntry(l)
@@ -312,6 +344,7 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 
 func newEntry(g *gocui.Gui, v *gocui.View) error {
 	var err error
+	v.Highlight = false
 	now := time.Now()
 	e := models.StartEntry(models.CurrentTask, now)
 	models.CurrentEntry = e
@@ -326,24 +359,43 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
-func doneEntry(g *gocui.Gui, v *gocui.View) error {
+// v will always equal output view
+func save(g *gocui.Gui, v *gocui.View) error {
 	var err error
-	now := time.Now()
-	o, _ := g.View("output")
-	d := o.Buffer()
-	models.StopEntry(models.CurrentEntry, now, d)
-	entriesView, _ := g.View(E)
-	bottom = true
-	redrawEntries(g, entriesView)
-	ov, err := g.View("output")
-	if err != nil {
-		return err
+	if dView != nil && dView.Name() == P {
+		// Project
+		d := v.Buffer()
+		models.CurrentProject.Description = d
+		models.DB.Save(&models.CurrentProject)
+		projectsView, _ := g.View(P)
+		g.SetCurrentView(P)
+		redrawProjects(g, projectsView)
+		v.Editable = false
+		g.Cursor = false
+	} else if dView != nil && dView.Name() == T {
+		// Task
+		d := v.Buffer()
+		models.CurrentTask.Description = d
+		models.DB.Save(&models.CurrentTask)
+		tasksView, _ := g.View(T)
+		g.SetCurrentView(T)
+		redrawTasks(g, tasksView)
+		v.Editable = false
+		g.Cursor = false
+	} else {
+		// Entry
+		d := v.Buffer()
+		models.StopEntry(models.CurrentEntry, time.Now(), d)
+		entriesView, _ := g.View(E)
+		entriesView.Highlight = true
+		// bottom = true
+		g.SetCurrentView(E)
+		redrawEntries(g, entriesView)
+		v.Editable = false
+		g.Cursor = false
+		bottom = false
 	}
-	ov.Editable = false
-	g.Cursor = false
-	g.SetCurrentView(E)
-	bottom = false
-
+	dView = nil
 	return err
 }
 
@@ -366,25 +418,77 @@ func redrawOutput(g *gocui.Gui, v *gocui.View) {
 	// b := models.CurrentEntry.Start.IsZero()
 	// log.Println("CurrentEntry Start:", models.CurrentEntry.Start.IsZero())
 	// log.Println("redrawOutput CurrentEntry:", models.CurrentEntry.Name)
-	cv := g.CurrentView()
-	if models.CurrentEntry.Start.IsZero() == false &&
-		cv.Name() != P && cv.Name() != T {
-		// if models.CurrentEntry.Name != "" {
-		// _, cy := v.Cursor()
-		// l, _ := v.Line(cy)
-		details := models.CurrentEntry.Details
-		start := models.CurrentEntry.Start.Format(models.TL)
-		end := models.CurrentEntry.End.Format(models.TL)
-		hours := int(models.CurrentEntry.TotalTime.Hours())
-		minutes := int(models.CurrentEntry.TotalTime.Minutes())
-		if _, err := fmt.Fprintf(v, "Start: %v\nEnd:   %v\n%d Hours\n%d Minutes\n\n",
-			start, end, hours, minutes); err != nil {
-			log.Println("Error writing to the entries view:", err)
+	if cv := g.CurrentView(); cv != nil {
+		// log.Println("redrawOutput cv.Name():", cv.Name())
+		// Projects
+		if cv.Name() == P {
+			h, m := models.CurrentProject.HoursMinutes()
+			if _, err := fmt.Fprintf(v, "%d Hours\n%d Minutes\n\n",
+				h, m); err != nil {
+				log.Println("Error writing project time to the output view:", err)
+			}
+			if _, err := fmt.Fprintf(v, models.CurrentProject.Description); err != nil {
+				log.Println("Error writing project description to the output view:", err)
+			}
 		}
-		if _, err := fmt.Fprintln(v, details); err != nil {
-			log.Println("Error writing to the entries view:", err)
+		if cv.Name() == T {
+			h, m := models.CurrentTask.HoursMinutes()
+			if _, err := fmt.Fprintf(v, "%d Hours\n%d Minutes\n\n",
+				h, m); err != nil {
+				log.Println("Error writing task time to the output view:", err)
+			}
+			if _, err := fmt.Fprintf(v, models.CurrentTask.Description); err != nil {
+				log.Println("Error writing task description to the output view:", err)
+			}
+		}
+		// Entries
+		if models.CurrentEntry.Start.IsZero() == false &&
+			cv.Name() == E {
+			details := models.CurrentEntry.Details
+			start := models.CurrentEntry.Start.Format(models.TL)
+			end := models.CurrentEntry.End.Format(models.TL)
+			// hours, minutes := models.HoursMinutes(models.CurrentEntry)
+			hours, minutes := models.CurrentEntry.HoursMinutes()
+
+			// if _, err := fmt.Fprintf(v, "Start: %v\nEnd:   %v\n%d Hours\n%d Minutes\n\n",
+			// 	start, end, hours, minutes); err != nil {
+			// 	log.Println("Error writing entry to the output view:", err)
+			// }
+			if _, err := fmt.Fprintf(v, "%d Hours\n%d Minutes\nStart: %v\nEnd:   %v\n\n",
+				hours, minutes, start, end); err != nil {
+				log.Println("Error writing entry to the output view:", err)
+			}
+			if _, err := fmt.Fprintln(v, details); err != nil {
+				log.Println("Error writing entry to the output view:", err)
+			}
 		}
 	}
+}
+
+func addDescription(g *gocui.Gui, v *gocui.View) error {
+	var err error
+	dView = v
+	switch v.Name() {
+	case P:
+		ov, _ := g.SetCurrentView("output")
+		ov.Clear()
+		if _, err = fmt.Fprintf(ov, models.CurrentProject.Description); err != nil {
+			log.Println("Error writing project description to the output view:", err)
+		}
+		ov.Editable = true
+		g.Cursor = true
+		ov.SetCursor(0, 0)
+	case T:
+		ov, _ := g.SetCurrentView("output")
+		ov.Clear()
+		if _, err = fmt.Fprintf(ov, models.CurrentTask.Description); err != nil {
+			log.Println("Error writing task description to the output view:", err)
+		}
+		ov.Editable = true
+		g.Cursor = true
+		ov.SetCursor(0, 0)
+	}
+	return err
 }
 
 // The layout handler calculates all sizes depending on the current terminal size.

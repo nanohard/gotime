@@ -12,7 +12,7 @@ var DB *gorm.DB
 // Setting will contain the only row from the settings table.
 type setting struct {
 	gorm.Model
-	Sort      string
+	SortBy    string
 	SortOrder string
 }
 
@@ -37,12 +37,12 @@ func InitDB() {
 	DB.AutoMigrate(&Project{}, &Task{}, &Entry{}, &setting{})
 
 	// Create settings table.
-	DB.Exec("INSERT OR IGNORE INTO settings (id, sort, sort_order) VALUES(1, 'name', 'asc')")
+	DB.Exec("INSERT OR IGNORE INTO settings (id, sort_by, sort_order) VALUES(1, 'name', 'asc')")
 	// DB.Commit()
 	// Get only row from settings table and insert into exported variable.
 
-	row := DB.Table("settings").Where("id = ?", "1").Select("sort, sort_order").Row() // (*sql.Row)
-	row.Scan(&Setting.Sort, &Setting.SortOrder)
+	row := DB.Table("settings").Where("id = ?", "1").Select("sort_by, sort_order").Row() // (*sql.Row)
+	row.Scan(&Setting.SortBy, &Setting.SortOrder)
 	// DB.First does not work for some reason...
 	// DB.First(&S, 1)
 }
