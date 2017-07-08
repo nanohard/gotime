@@ -23,6 +23,13 @@ Upon starting the program you will be required to type in the name of a project.
 * **Arrow Keys**: Left and right will navigate between Projects, Tasks, and Entries. Up and down will navigate within projects, tasks, and entries.
 * **Ctrl-C**: Quit the program.
 
+## ToDo
+- [ ] Windows compatible
+- [ ] Mac compatible
+- [ ] Integrate Harvest API
+- [ ] Allow for archiving
+
+
 ## Credits
 Created by [**Nanohard**](https://github.com/nanohard)
 
