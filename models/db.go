@@ -1,6 +1,8 @@
 package models
 
 import (
+	"os/user"
+
 	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/sqlite" // sqlite3 driver
 )
@@ -23,9 +25,11 @@ var Setting setting
 // It is used in main.go.
 func InitDB() {
 	var err error
-	DB, err = gorm.Open("sqlite3", "./test.db")
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	DB, err = gorm.Open("sqlite3", dir+"/.gotime.db")
 	if err != nil {
-		panic("failed to connect database")
+		panic("failed to connect to " + dir + "/.gotime.db")
 	}
 
 	DB.Exec(`PRAGMA foreign_keys=ON`) // Need this to use foreign keys on sqlite.

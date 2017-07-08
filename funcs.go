@@ -84,7 +84,6 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 		ov, _ = g.View(P)
 		if iv.Buffer() != "" {
 			models.AddProject(iv.Buffer())
-			redrawProjects(g, ov)
 		} else {
 			inputView(g, ov)
 			return nil
@@ -93,7 +92,6 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 		ov, _ = g.View(T)
 		if iv.Buffer() != "" {
 			models.AddTask(iv.Buffer(), models.CurrentProject)
-			redrawTasks(g, ov)
 		} else {
 			inputView(g, ov)
 			return nil
@@ -113,6 +111,12 @@ func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	// Set the view back.
 	if _, err = g.SetCurrentView(ov.Name()); err != nil {
 		return err
+	}
+	switch ov.Name() {
+	case P:
+		redrawProjects(g, ov)
+	case T:
+		redrawTasks(g, ov)
 	}
 	return err
 }

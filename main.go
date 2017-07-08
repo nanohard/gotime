@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"os/user"
 
 	"github.com/jroimartin/gocui"
 	"github.com/nanohard/gotime/models"
@@ -34,9 +35,11 @@ const (
 
 func main() {
 	// Debug log
-	f, err := os.OpenFile("log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	f, err := os.OpenFile(dir+"/.gotime.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		log.Fatalf("error opening file: %v", err)
+		fmt.Println("file no existy")
 	}
 	defer f.Close()
 	log.SetOutput(f)
@@ -121,10 +124,6 @@ func main() {
 	outputView.FgColor = gocui.ColorWhite
 	// Let the view scroll if the output exceeds the visible area.
 	outputView.Autoscroll = true
-	_, err = fmt.Println(outputView, "Press Ctrl-c to quit")
-	if err != nil {
-		log.Println("Failed to print into output view (2):", err)
-	}
 	outputView.Wrap = true
 
 	// Status view.
