@@ -30,8 +30,6 @@ Download the [zip](https://github.com/nanohard/gotime/files/1133188/gotime-1.0.1
 
 ## ToDo
 - [ ] Build OS package(s)
-- [ ] Windows compatible
-- [ ] Mac compatible
 - [ ] Integrate Harvest API
 - [ ] Allow for archiving
 
