@@ -15,6 +15,11 @@ The time is stamped in seconds upon starting and stopping an entry; no timer is 
 ## Getting Started
 Upon starting the program you will be required to type in the name of a project. Navigate to the right and press Ctrl-A to add a task, and do the same to create and start an entry. Press Ctrl-S to save the entry.
 
+### Installation
+Download the [zip](https://github.com/nanohard/gotime/files/1133188/gotime-1.0.1.zip) of the binary or
+
+`go get github.com/nanohard/gotime`
+
 ## Controls
 * **Ctrl-A**: Add an item to the current view. If in the entries view it will "start" an Entry. This will create a timestamp of the current time and create an entry in the database. At this point you may type notes into the Entry's details. Press Ctrl-S to stop and save the Entry.
 * **Ctrl-S**: Save the text you have written in the output box, whether for an Entry's details or a description for a Project or Task. For an Entry this will save the details you have written and stop the timer.
@@ -24,6 +29,7 @@ Upon starting the program you will be required to type in the name of a project.
 * **Ctrl-C**: Quit the program.
 
 ## ToDo
+- [ ] Build OS package(s)
 - [ ] Windows compatible
 - [ ] Mac compatible
 - [ ] Integrate Harvest API
