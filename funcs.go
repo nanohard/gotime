@@ -22,15 +22,24 @@ func cursorDown(g *gocui.Gui, v *gocui.View) error {
 		n, _ := v.Line(cy)
 		if v.Name() == P {
 			nv, _ := g.View(T)
-			models.CurrentProject = models.GetProject(n)
+			if n != "" {
+				models.CurrentProject = models.GetProject(n)
+			}
+			// log.Println("cursorDown project.id:", models.CurrentProject.ID)
 			redrawTasks(g, nv)
 		} else if v.Name() == T {
 			nv, _ := g.View(E)
-			models.CurrentTask = models.GetTask(n)
+			if n != "" {
+				models.CurrentTask = models.GetTask(n)
+			}
+			// log.Println("cursorDown task.id:", models.CurrentTask.ID)
 			redrawEntries(g, nv)
 		} else if v.Name() == E {
 			nv, _ := g.View(O)
-			models.CurrentEntry = models.GetEntry(n)
+			if n != "" {
+				models.CurrentEntry = models.GetEntry(n)
+			}
+			// log.Println("cursorUp entry.id:", models.CurrentEntry.ID)
 			redrawOutput(g, nv)
 		}
 	}
@@ -44,15 +53,30 @@ func cursorUp(g *gocui.Gui, v *gocui.View) error {
 		n, _ := v.Line(cy)
 		if v.Name() == P {
 			nv, _ := g.View(T)
-			models.CurrentProject = models.GetProject(n)
+			if n != "" {
+				models.CurrentProject = models.GetProject(n)
+			} else {
+				models.CurrentProject = models.Project{}
+			}
+			// log.Println("cursorUp project.id:", models.CurrentProject.ID)
 			redrawTasks(g, nv)
 		} else if v.Name() == T {
 			nv, _ := g.View(E)
-			models.CurrentTask = models.GetTask(n)
+			if n != "" {
+				models.CurrentTask = models.GetTask(n)
+			} else {
+				models.CurrentTask = models.Task{}
+			}
+			// log.Println("cursorUp task.id:", models.CurrentTask.ID)
 			redrawEntries(g, nv)
 		} else if v.Name() == E {
 			nv, _ := g.View(O)
-			models.CurrentEntry = models.GetEntry(n)
+			if n != "" {
+				models.CurrentEntry = models.GetEntry(n)
+			} else {
+				models.CurrentEntry = models.Entry{}
+			}
+			// log.Println("cursorUp entry.id:", models.CurrentEntry.ID)
 			redrawOutput(g, nv)
 		}
 	}
@@ -165,12 +189,16 @@ func selectItem(g *gocui.Gui, cv *gocui.View) error {
 			if nv, err = g.SetCurrentView(T); err != nil {
 				return err
 			}
+			models.CurrentEntry = models.Entry{}
+			// log.Println("selectItem project view CurrentEntry:", models.CurrentEntry.ID)
 			nv.SetCursor(0, 0)
 			cursorUp(g, nv)
 		case T:
 			if nv, err = g.SetCurrentView(E); err != nil {
 				return err
 			}
+			models.CurrentEntry = models.Entry{}
+			// log.Println("selectItem task view CurrentEntry:", models.CurrentEntry.ID)
 			nv.SetCursor(0, 0)
 			cursorUp(g, nv)
 		}
@@ -196,17 +224,20 @@ func deleteItem(g *gocui.Gui, v *gocui.View) error {
 		switch v.Name() {
 		case P:
 			models.CurrentProject.Delete()
+			models.CurrentProject = models.Project{}
 			redrawProjects(g, v)
 			v.SetCursor(0, 0)
 			cursorUp(g, v)
 		case T:
 			models.CurrentTask.Delete()
+			models.CurrentTask = models.Task{}
 			redrawTasks(g, v)
 			v.SetCursor(0, 0)
 			cursorUp(g, v)
 
 		case E:
 			models.CurrentEntry.Delete()
+			models.CurrentEntry = models.Entry{}
 			redrawEntries(g, v)
 			v.SetCursor(0, 0)
 			cursorUp(g, v)
@@ -233,6 +264,7 @@ func goBack(g *gocui.Gui, cv *gocui.View) error {
 		if nv, err = g.SetCurrentView(T); err != nil {
 			return err
 		}
+		models.CurrentEntry = models.Entry{}
 		outputView, _ := g.View(O)
 		redrawOutput(g, outputView)
 	}
@@ -268,7 +300,10 @@ func redrawProjects(g *gocui.Gui, v *gocui.View) {
 	// so we need to refresh the tasks view with the currently highlighted project.
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
-	models.CurrentProject = models.GetProject(l)
+	if l != "" {
+		models.CurrentProject = models.GetProject(l)
+	}
+	// log.Println("redrawProjects project.id:", models.CurrentProject.ID)
 	tasksView, _ := g.View(T)
 	// Projects is only redrawn if in the projects view, so it's
 	// safe to zero the current task and entry.
@@ -310,6 +345,7 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 		for _, i := range items {
 			// We can simply Fprint to a view.
 			_, err := fmt.Fprintln(v, i.Name)
+			// log.Println("redrawEntries CurrentTask.ID:", models.CurrentTask.ID)
 			if err != nil {
 				log.Println("Error writing to the entries view:", err)
 			}
@@ -324,7 +360,9 @@ func redrawEntries(g *gocui.Gui, v *gocui.View) {
 	// Read the cursor, get the data, print it.
 	_, cy := v.Cursor()
 	l, _ := v.Line(cy)
-	models.CurrentEntry = models.GetEntry(l)
+	if l != "" {
+		models.CurrentEntry = models.GetEntry(l)
+	}
 	outputView, _ := g.View(O)
 	redrawOutput(g, outputView)
 }

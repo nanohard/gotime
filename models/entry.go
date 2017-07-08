@@ -43,7 +43,7 @@ func AllEntries(t Task) []Entry {
 // after scanning it into the struct.
 func GetEntry(n string) Entry {
 	var e Entry
-	DB.Where("name = ?", n).First(&e)
+	DB.Where(&Entry{Name: n}).First(&e)
 	return e
 }
 

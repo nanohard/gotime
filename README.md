@@ -5,6 +5,8 @@ Time tracker for projects and tasks written in golang.
 
 **Only supported on Linux**
 
+![gotime](https://user-images.githubusercontent.com/10169206/27987771-f1a5bd9e-63d8-11e7-8d3d-a8abc33bd0e9.gif)
+
 ## Overview
 I created this in response to my need to record entries for tasks and tasks for projects, and my want to not have to type a whole command in the console for every action I wanted to perform. Thus gotime was born; an ncurses-style console user interface program with an SQlite3 database.
 
@@ -14,7 +16,7 @@ The time is stamped in seconds upon starting and stopping an entry; no timer is 
 Upon starting the program you will be required to type in the name of a project. Navigate to the right and press Ctrl-A to add a task, and do the same to create and start an entry. Press Ctrl-S to save the entry.
 
 ## Controls
-* **Ctrl-A**: Adds an item to the current view. If in the entries view it will "start" an Entry. This will create a timestamp of the current time and create an entry in the database. At this point you may type notes into the Entry's details. Press Ctrl-S to stop and save the Entry.
+* **Ctrl-A**: Add an item to the current view. If in the entries view it will "start" an Entry. This will create a timestamp of the current time and create an entry in the database. At this point you may type notes into the Entry's details. Press Ctrl-S to stop and save the Entry.
 * **Ctrl-S**: Save the text you have written in the output box, whether for an Entry's details or a description for a Project or Task. For an Entry this will save the details you have written and stop the timer.
 * **Ctrl-D**: Add a description to a Project or Task.
 * **Ctrl-R**: Remove an Entry, Task, or Project. Removing a Project or Task will also remove all of its children.

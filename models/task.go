@@ -34,7 +34,8 @@ func AllTasks(p Project) []Task {
 func GetTask(n string) Task {
 	var t Task
 	n = strings.TrimSpace(n)
-	DB.Where("name = ?", n).First(&t)
+	// DB.Where(&Task{Name: n}).First(&t)
+	DB.Model(&CurrentProject).Where(&Task{Name: n}).Related(&t)
 	return t
 }
 
