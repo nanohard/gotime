@@ -1,7 +1,7 @@
 # gotime
 Time tracker for projects and tasks written in golang.
 
-[![GoDoc](https://godoc.org/github.com/nanohard/gotime?status.svg)](https://godoc.org/github.com/nanohard/gotime) [![Join the chat at https://gitter.im/nanohard/gotime](https://badges.gitter.im/nanohard/gotime.svg)](https://gitter.im/nanohard/gotime?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![GoDoc](https://godoc.org/github.com/nanohard/gotime?status.svg)](https://godoc.org/github.com/nanohard/gotime) [![Join the chat at https://gitter.im/nanohard/gotime](https://badges.gitter.im/nanohard/gotime.svg)](https://gitter.im/nanohard/gotime?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge) [![Beerpay](https://beerpay.io/nanohard/gotime/badge.svg?style=flat)](https://beerpay.io/nanohard/gotime)
 
 **Only supported on Linux**
 
