@@ -43,3 +43,8 @@ Created by [**Nanohard**](https://github.com/nanohard)
 
 ### License
 Released under the [BSD-3 License](https://github.com/nanohard/gotime/blob/master/LICENSE)
+
+## Support on Beerpay
+Hey dude! Help me out for a couple of :beers:!
+
+[![Beerpay](https://beerpay.io/nanohard/gotime/badge.svg?style=beer-square)](https://beerpay.io/nanohard/gotime)  [![Beerpay](https://beerpay.io/nanohard/gotime/make-wish.svg?style=flat-square)](https://beerpay.io/nanohard/gotime?focus=wish)
