@@ -20,3 +20,10 @@ gotime
 # Log
 log
 *.log
+
+# GoLand
+.idea
+
+# export files
+*.csv
+*.json

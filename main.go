@@ -39,7 +39,7 @@ func main() {
 	dir := usr.HomeDir
 	f, err := os.OpenFile(dir+"/.gotime.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-		fmt.Println("file no existy")
+		fmt.Println("file no exists")
 	}
 	defer f.Close()
 	log.SetOutput(f)

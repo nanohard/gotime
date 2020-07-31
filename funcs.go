@@ -1,8 +1,11 @@
 package main
 
 import (
+	"encoding/csv"
 	"fmt"
 	"log"
+	"os"
+	"strings"
 	"time"
 
 	"github.com/jroimartin/gocui"
@@ -95,6 +98,7 @@ func lineBelow(g *gocui.Gui, v *gocui.View) bool {
 
 // Copy the input view (iv) and handle it.
 // Used to add project or task.
+// TODO: Fix error that pops up when adding two entries in one minute
 func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	var err error
 	// We want to read the view’s buffer from the beginning.
@@ -535,6 +539,44 @@ func layout(g *gocui.Gui) error {
 	// 	return errors.Wrap(err, "Cannot update input view.")
 	// }
 	return nil
+}
+
+// ExportEntriesCsv creates a CSV file of all of the user's entries for the current task
+// Bound to Ctrl-E | exported so that it can be used by a testing function in a seperate package
+func ExportEntriesCsv(g *gocui.Gui, v *gocui.View) error {
+	var err error = nil
+
+	// get all entries from the database
+	entries := models.AllEntries(models.CurrentTask)
+
+	// create CSV file
+	taskFileName := strings.ReplaceAll(models.CurrentTask.Name, " ", "_")
+	file, err := os.Create(taskFileName + "_entries.csv")
+	if err != nil {
+		log.Println(err)
+	}
+	defer file.Close()
+
+	// create a new writer type
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// write CSV headers to file
+	headers := []string{"Entry Details", "Time Worked", "Project Name", "Task Name"}
+	err = writer.Write(headers)
+
+	// write contents of each entry to a row in the CSV (string-writeable data)
+	for _, record := range entries {
+		timeWorked := record.End.Sub(record.Start) // user %v to format this when printing
+
+		values := []string{record.Details, timeWorked.String(), record.Task.Project.Name, models.CurrentTask.Name}
+		err := writer.Write(values)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	return err
 }
 
 // quit is a handler that gets bound to Ctrl-gocui. It signals the main loop to exit.
