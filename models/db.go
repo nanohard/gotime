@@ -33,7 +33,7 @@ func InitDB() {
 	}
 
 	DB.Exec(`PRAGMA foreign_keys=ON`) // Need this to use foreign keys on sqlite.
-	DB.LogMode(true)                  // Turn on for debugging.
+	//DB.LogMode(true)                  // Turn on for debugging.
 
 	// Creates tables, columns, indexes. Does not delete or modify existing.
 	DB.AutoMigrate(&Project{}, &Task{}, &Entry{}, &setting{})
