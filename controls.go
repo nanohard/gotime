@@ -1,6 +1,9 @@
 package main
 
-import "github.com/jroimartin/gocui"
+import (
+	"github.com/jroimartin/gocui"
+	"github.com/nanohard/gotime/models"
+)
 
 func keybindings(g *gocui.Gui) error {
 	if err := g.SetKeybinding("", gocui.KeyCtrlC, gocui.ModNone, quit); err != nil {
@@ -61,6 +64,9 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 	if err := g.SetKeybinding("output", gocui.KeyCtrlS, gocui.ModNone, save); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("", gocui.KeyCtrlE, gocui.ModNone, models.ExportTaskCsv); err != nil {
 		return err
 	}
 

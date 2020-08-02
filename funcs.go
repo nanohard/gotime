@@ -95,6 +95,7 @@ func lineBelow(g *gocui.Gui, v *gocui.View) bool {
 
 // Copy the input view (iv) and handle it.
 // Used to add project or task.
+// TODO: Fix error that pops up when adding two entries in one minute
 func copyInput(g *gocui.Gui, iv *gocui.View) error {
 	var err error
 	// We want to read the view’s buffer from the beginning.

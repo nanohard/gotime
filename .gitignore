@@ -21,3 +21,6 @@ gotime
 # Log
 log
 *.log
+
+# GoLand
+.idea
