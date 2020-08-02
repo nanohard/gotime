@@ -1,6 +1,10 @@
 package models
 
 import (
+	"encoding/csv"
+	"github.com/jroimartin/gocui"
+	"log"
+	"os"
 	"strings"
 	"time"
 
@@ -71,4 +75,45 @@ func (t Task) HoursMinutes() (h int, m int) {
 	i := float64(f) + float64(0.5)
 	minutes := int(i)
 	return hours, minutes
+}
+
+// ExportTaskCsv creates a CSV file of all of the user's entries for the current task. Bound to Ctrl-E.
+func ExportTaskCsv(g *gocui.Gui, v *gocui.View) error {
+	var err error = nil
+
+	// get all entries from the database
+	entries := AllEntries(CurrentTask)
+
+	// create CSV file
+	taskFileName := strings.ReplaceAll(strings.ToLower(CurrentTask.Name), " ", "_")
+	file, err := os.Create(taskFileName + "_entries.csv")
+	if err != nil {
+		log.Println(err)
+	}
+	defer file.Close()
+
+	// create a new writer type
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	// write CSV headers to file
+	headers := []string{"Entry Details", "Time Worked", "Project Name", "Task Name"}
+	err = writer.Write(headers)
+
+	// find associated project for the task from the database
+	var p Project
+	DB.First(&p, CurrentTask.ProjectID)
+
+	// write contents of each entry to a row in the CSV (string-writeable data)
+	for _, record := range entries {
+		timeWorked := record.End.Sub(record.Start)
+
+		values := []string{record.Details, timeWorked.String(), p.Name, CurrentTask.Name}
+		err := writer.Write(values)
+		if err != nil {
+			log.Println(err)
+		}
+	}
+
+	return err
 }
