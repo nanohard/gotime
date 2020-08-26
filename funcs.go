@@ -387,6 +387,37 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
+// Edit existing entry
+func editEntry(g *gocui.Gui, v *gocui.View) error {
+	var err error
+	v.Highlight = false
+	ov, err := g.SetCurrentView("output")
+	if err != nil {
+		return err
+	}
+	if err = drawEntryBody(g, ov); err != nil {
+		return err
+	}
+	ov.Editable = true
+	g.Cursor = true
+	ov.SetCursor(0, 0)
+	return err
+}
+
+// Output only body of an entry for editing its text
+func drawEntryBody(g *gocui.Gui, v *gocui.View) error {
+	var err error
+
+	v.Clear()
+	details := models.CurrentEntry.Details
+
+	if _, err := fmt.Fprintln(v, details); err != nil {
+		log.Println("Error writing entry to the output view:", err)
+	}
+
+	return err
+}
+
 // v will always equal output view
 // This saves the text in the output view and does what it needs to do
 // with it depending on what view it was called from (before switching to the output view).
