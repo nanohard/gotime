@@ -70,5 +70,37 @@ func keybindings(g *gocui.Gui) error {
 		return err
 	}
 
+	// Vim-like cursor move bindings
+	if err := g.SetKeybinding("projects", 'k', gocui.ModNone, cursorUp); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("projects", 'j', gocui.ModNone, cursorDown); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("projects", 'l', gocui.ModNone, selectItem); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("tasks", 'k', gocui.ModNone, cursorUp); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("tasks", 'j', gocui.ModNone, cursorDown); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("tasks", 'l', gocui.ModNone, selectItem); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("tasks", 'h', gocui.ModNone, goBack); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("entries", 'k', gocui.ModNone, cursorUp); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("entries", 'j', gocui.ModNone, cursorDown); err != nil {
+		return err
+	}
+	if err := g.SetKeybinding("entries", 'h', gocui.ModNone, goBack); err != nil {
+		return err
+	}
+
 	return nil
 }
