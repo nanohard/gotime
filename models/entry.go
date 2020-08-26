@@ -8,7 +8,7 @@ import (
 
 const (
 	// TL is the time layout we will use.
-	TL = "2006-01-02 15:04"
+	TL = "2006-01-02 15:04:05"
 )
 
 // CurrentEntry holds the struct of the currently
