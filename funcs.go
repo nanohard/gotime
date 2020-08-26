@@ -387,6 +387,39 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
+// Enable edit mode for an existing entry
+// After editing the details of the entry its end time will be updated
+func startEditingEntry(g *gocui.Gui, v *gocui.View) error {
+	var err error
+	v.Highlight = false
+	ov, err := g.SetCurrentView("output")
+	if err != nil {
+		return err
+	}
+	if err = outputEntryDetails(g, ov); err != nil {
+		return err
+	}
+	ov.Editable = true
+	g.Cursor = true
+	ov.SetCursor(0, 0)
+	return err
+}
+
+// v will always equal output view
+// This outputs only the details of the entry for the purpose of further editing it
+func outputEntryDetails(g *gocui.Gui, v *gocui.View) error {
+	var err error
+
+	v.Clear()
+	details := models.CurrentEntry.Details
+
+	if _, err := fmt.Fprintln(v, details); err != nil {
+		log.Println("Error writing entry to the output view:", err)
+	}
+
+	return err
+}
+
 // v will always equal output view
 // This saves the text in the output view and does what it needs to do
 // with it depending on what view it was called from (before switching to the output view).
