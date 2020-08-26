@@ -387,15 +387,16 @@ func newEntry(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
-// Edit existing entry
-func editEntry(g *gocui.Gui, v *gocui.View) error {
+// Enable edit mode for an existing entry
+// After editing the details of the entry its end time will be updated
+func startEditingEntry(g *gocui.Gui, v *gocui.View) error {
 	var err error
 	v.Highlight = false
 	ov, err := g.SetCurrentView("output")
 	if err != nil {
 		return err
 	}
-	if err = drawEntryBody(g, ov); err != nil {
+	if err = outputEntryDetails(g, ov); err != nil {
 		return err
 	}
 	ov.Editable = true
@@ -404,8 +405,9 @@ func editEntry(g *gocui.Gui, v *gocui.View) error {
 	return err
 }
 
-// Output only body of an entry for editing its text
-func drawEntryBody(g *gocui.Gui, v *gocui.View) error {
+// v will always equal output view
+// This outputs only the details of the entry for the purpose of further editing it
+func outputEntryDetails(g *gocui.Gui, v *gocui.View) error {
 	var err error
 
 	v.Clear()
