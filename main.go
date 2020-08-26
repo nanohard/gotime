@@ -20,7 +20,7 @@ const (
 	// Tasks box width.
 	twidth = 44
 	// Entries box width.
-	ewidth = 62
+	ewidth = 65
 	// Input box height.
 	sheight = 3
 	// P is string for projects.
